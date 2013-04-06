@@ -107,13 +107,32 @@ def read_ov_travels_file(filename):
     # Reading the file is a bit messy, because for some rediculous reason 
     # ov-chipkaart.nl insists on printing the checkout event before the checkin event 
     while line:
-        event=_ov_line_to_list(line)
+        spline=_ov_line_to_list(line)
 
-        # If the current line is a checkout, the previous line is a checkin
-        if event[6] == "Reis":
-            checkout_event=event
-            checkin_event=_ov_line_to_list(fileIN.readline())
-            travels.append(_ov_events_to_trip(checkin_event, checkout_event))
+        # If the current line is a checkout, the next line is a checkin
+        if spline[6] == "Reis":
+            checkout_line=spline
+            checkin_line=_ov_line_to_list(fileIN.readline())
+
+            # Get the checkin event
+            date=checkin_line[0]
+            time=checkin_line[1]
+            dtime=_date_and_time(date,time)
+            checkin=Event(dtime,checkin_line[2])
+
+            # Get the checkout event
+            date=checkout_line[0]
+            time=checkout_line[3]
+            dtime=_date_and_time(date,time)
+            checkout=Event(dtime,checkout_line[4])
+
+            # Get the price
+            price=checkout_line[5]
+            price=price.replace(',','.')
+            price=-1* float(price)
+
+            travels.append(Trip(checkin,checkout,price))
+            #travels.append(_ov_events_to_trip(checkin_event, checkout_event))
         else: # TODO what if it isn't a checkout?
             pass
         line=fileIN.readline()

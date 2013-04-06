@@ -21,7 +21,7 @@ def main():
     extension=sys.argv[1].split('.')[-1]
     if extension == "csv":
         # Read ov-chipkaart.nl travels file
-        travels=ovnl.read_ov_travels_file(filename)
+        travels,transactions=ovnl.read_ov_travels_file(filename)
     elif extension == "xls":
         # Read the NS travels file
         travels,transactions=ovnl.read_ns_travels_file(filename)
@@ -29,7 +29,8 @@ def main():
     for transaction in transactions:
         print("{}\t{}\t{}".format(transaction.time, transaction.place, transaction.price))
 
-    
+    for trip in travels:
+        print(trip)
     # PRINT THE MINIMUM TRAVEL TIMES
     #min_times=minimum_travel_times(travels)
     #for key in min_times.keys():
