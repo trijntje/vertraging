@@ -1,0 +1,14 @@
+Handle daylight saving properly
+Make it run under python2, and remove xlrd from the repository DONE
+Add data.py which contains data on the different card types
+    The amount of discount given with a given card type
+    The times of the day the discount applies to
+
+Split up the program from the library DONE
+    use data.py to check if a trip was with discount/free
+Add support for traveldata provided by ov-chipkaart.nl  DONE
+    Write check to see if it was a full export or only a checkout export
+Find the proper way to extract text from xls cells DONE
+Clean up Trip.__init__, move parsing of lines to read_ns/ov_travels_file DONE
+Check if the stupid ov-chipkaart file isn't reversed (this is possible to do on the website, and carries over into the exported file)
+Join methods/functions for ns and ov datafiel into seperate classes for clarity
