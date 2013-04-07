@@ -90,19 +90,61 @@ def _ov_events_to_trip(checkin,checkout):
     t=Trip(check_in_datetime, check_in_loc, check_out_datetime, check_out_loc, price)
     return t
 
-def read_ov_travels_file(filename):
-    travels=list()
-    transactions=list()
+def _valid_ov_file(filename):
     fileIN=open(filename,'r')
 
     # Lets check if this is a well formatted csv file
     line=fileIN.readline()
+    fileIN.close()
     spline=line.strip().split(';')
     if spline != ovdata.ov_header:
-        error("Unable to recognise the csv file by the header, please file a bug")
-        error("{}\nis not equal to the expected\n{}".format(spline,ovdata.ov_header))
-        exit(-1)
+        return False
+    else:
+        return True
 
+def _long_ov_file(filename):
+    fileIN=open(filename,'r')
+    # Skip header
+    line=fileIN.readline()
+    line=fileIN.readline()
+
+    while line:
+        spline=line.split(';')
+        # Remove trailing newlines and enclosing quotes
+        spline = [field.replace('"','').strip() for field in spline]
+
+        # If a checkin time is specified for at least one trip
+        if spline[1] != "":
+            fileIN.close()
+            return True
+        
+        line=fileIN.readline()
+
+    fileIN.close()
+    return False
+
+def read_ov_travels_file(filename):
+    travels=list()
+    transactions=list()
+
+    # Lets check if this is a well formatted csv file
+    if not _valid_ov_file(filename):
+        error("Unable to recognise the csv file by the header, please file a bug")
+        #error("{}\nis not equal to the expected\n{}".format(spline,ovdata.ov_header))
+        return(travels,transactions)
+
+    if _long_ov_file(filename):
+        _read_ov_long_travels_file(filename)
+        print("True")
+    else:
+        _read_ov_short_travels_file(filename)
+        print("False")
+
+    exit()
+    fileIN=open(filename,'r')
+    #HEADER LINE
+    line=fileIN.readline()
+    #Second line
     line=fileIN.readline()
     # Reading the file is a bit messy, because for some rediculous reason 
     # ov-chipkaart.nl insists on printing the checkout event before the checkin event 

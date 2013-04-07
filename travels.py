@@ -8,13 +8,13 @@ import ovnl
 def main():
 
     if len(sys.argv) != 2:
-        error("Please specify a xls datafile")
+        ovnl.error("Please specify a xls datafile")
         exit(-1)
 
     # Check if file exists
     filename=sys.argv[1]
     if not os.path.exists(filename):
-        error("Cannot find file '{}', exiting..".format(filename))
+        ovnl.error("Cannot find file '{}', exiting..".format(filename))
         exit(-1)
 
     # TODO implement checking of file typ properly
@@ -26,8 +26,8 @@ def main():
         # Read the NS travels file
         travels,transactions=ovnl.read_ns_travels_file(filename)
 
-    for transaction in transactions:
-        print("{}\t{}\t{}".format(transaction.time, transaction.place, transaction.price))
+    #for transaction in transactions:
+        #print("{}\t{}\t{}".format(transaction.time, transaction.place, transaction.price))
 
     for trip in travels:
         print(trip)
@@ -37,10 +37,10 @@ def main():
     #    print("Van {} naar {}\t{}".format(key[0],key[1],min_times[key]))
 
     # PRINT POSSIBLE DELAYS:
-    delays=ovnl.possible_delays(travels)
-    print("Possible delays in {} of {} trips:".format(len(delays), len(travels)))
-    for trip in delays:
-        print(trip)
+    #delays=ovnl.possible_delays(travels)
+    #print("Possible delays in {} of {} trips:".format(len(delays), len(travels)))
+    #for trip in delays:
+    #    print(trip)
 
     # PRINT THE MISSING CHECKOUTS
     #no_checkout=get_missing_checkout(travels)
