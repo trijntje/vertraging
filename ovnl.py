@@ -134,7 +134,7 @@ def read_ov_travels_file(filename):
         return(travels,transactions)
 
     if _long_ov_file(filename):
-        _read_ov_long_travels_file(filename)
+        ovdata._read_ov_long_travels_file(filename)
         print("True")
     else:
         _read_ov_short_travels_file(filename)
