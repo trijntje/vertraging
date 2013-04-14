@@ -15,10 +15,10 @@ Transaction=namedtuple('Transaction', 'time place price')
 
 # Unparsed traveldata, as an itermediate step from converting the datafile to
 # Trip objects. ci=checkin, co=checkout. klasse=dutch for class
-__Traveldata=namedtuple('Traveldata', 'ci_date ci_time ci_loc co_time co_loc price transaction klasse product notes')
+Traveldata=namedtuple('Traveldata', 'ci_date ci_time ci_loc co_time co_loc price klasse product private_or_business notes')
 
 # Unparsed transaction data, as an intermediate step
-__Transactiondata=namedtuple('Transactiondata', 'date time location price')
+Transactiondata=namedtuple('Transactiondata', 'date time location price')
 
 class Trip:
     """ Class for trip objects, ie a single travel movement
@@ -277,23 +277,24 @@ def read_ns_travels_file(filename):
             transactions.append(Transaction(dtime, place, price))
 
         # If its a trip (checkin and checkout present)
+        # Also assumes that there only was a 'deduction' from the card, so the 'added' field is empty
         else:
             # Get all the fields
             # TODO: What is the private_or_business field? Ignore it for now
 
-            # hiero
-            print("We zijn hiero")
-            print(ovdata.ns_header)
-            print(line)
-            print(line[:5])
             #ci_date ci_time ci_loc co_time co_loc price transaction klasse product notes')
             ci_date, ci_time, ci_loc, co_time, co_loc = line[:5]
-            print(line[5:])
-            #TODO
-            #price transaction klasse product notes
+
+            # Position 5 in the line is the 'deducted' column, so prefix the price with a minus
+            price='-'+line[5]
+            
+            # Get the other relevant fields (ignore 'added' column and 'transaction type', since we already know its a trip
+            klasse, product, private_or_business,notes = line[8:]
+
+            t=Traveldata(ci_date, ci_time, ci_loc, co_time, co_loc, price, klasse, product, private_or_business, notes)
+            print(t)
             exit()
 
-            date,check_in_time,check_in_loc,check_out_time,check_out_loc,price_minus, price_plus,transaction_type,klasse,product, private_or_business,notes = line
 
             # The price of the trip
             price=_determine_price(price_plus,price_minus)
