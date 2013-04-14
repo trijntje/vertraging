@@ -23,14 +23,33 @@ Transactiondata=namedtuple('Transactiondata', 'date time location price')
 class Trip:
     """ Class for trip objects, ie a single travel movement
     """
-    def __init__(self, checkin, checkout, price=None, klasse=None, product=None, notes=None):
-        self.checkin=checkin
-        self.checkout=checkout
-        self.price=price
-        self.klasse=klasse
-        self.product=product
-        self.notes=notes
+    def __init__(self, dataline):
+        # Get check in datetime
+        dtime=_create_datetime(dataline.ci_date,dataline.ci_time)
 
+        # Create checkin event
+        self.checkin=Event(dtime,dataline.ci_loc)
+
+        # Get check out datetime (date is only specified for checkin)
+        dtime=_create_datetime(dataline.ci_date,dataline.co_time)
+
+        # If the checkout was before the checkin, checkout was on 
+        # the next day
+        if dtime < self.checkin.time:
+            dtime+=datetime.timedelta(days=1)
+
+        # Create checkout event
+        self.checkout=Event(dtime,dataline.co_loc)
+
+        # Get the price, convert to decimal format and then to float
+        self.price=float(dataline.price.replace(',','.'))
+
+        # Other stuf, not sure what to do with this, but its in the data
+        self.klasse = dataline.klasse
+        self.product= dataline.product
+        self.notes= dataline.notes
+
+        # Duration of the trip
         self.duration=self.checkout.time-self.checkin.time
         
         # TODO self.discount=_determine_discount(self)
@@ -39,9 +58,8 @@ class Trip:
     def __str__(self):
         return str(self.checkin.time) + '\t' + self.checkin.place + '\t' + str(self.checkout.time) + '\t' + self.checkout.place + '\t' + str(self.price)
 
-def _date_and_time(date,time):
-        """
-        Converts strings date and time into a datetime object and returns it
+def _create_datetime(date,time):
+        """ Converts strings date and time into a datetime object and returns it
         """
         day,month,year=date.split('-')
 
@@ -234,6 +252,45 @@ def _determine_checkin_checkout_time(date,check_in_time,check_out_time):
 
         return (check_in_time,check_out_time)
 
+def _is_transaction(line):
+    if line[7] == "Laadtransactie" or line[4] == "":
+        return True
+    else:
+        return False
+
+def create_transaction(line):
+    # Time of the transaction
+    date, time=line[:2]
+    dtime=_create_datetime(date,time)
+
+    # Location of the transaction
+    place=line[2]
+
+    # What is the credit change on the card
+    # If we added credit to the card
+    if line[7] == "Laadtransactie":
+        price=float(line[6].replace(',','.'))
+    else: # If we forgot to checkout, price was deducted
+        price=-1*float(line[5].replace(',','.'))
+
+    return Transaction(dtime, place, price)
+
+
+def create_trip(line):
+    # This function assumes that there only was a 'deduction' from the card, so the 'added' field is empty
+    
+    ci_date, ci_time, ci_loc, co_time, co_loc = line[:5]
+
+    # Position 5 in the line is the 'deducted' column, so prefix the price with a minus
+    price='-'+line[5]
+    
+    # Get the other relevant fields (ignore 'added' column and 'transaction type', since we already know its a trip
+    klasse, product, private_or_business,notes = line[8:]
+
+    # Intermediate format of the data, to avoid code duplications
+    dataline=Traveldata(ci_date, ci_time, ci_loc, co_time, co_loc, price, klasse, product, private_or_business, notes)
+    return Trip(dataline)
+
 def read_ns_travels_file(filename):
     """
     Reads the specified xls filename, returns all trips in a list
@@ -256,61 +313,12 @@ def read_ns_travels_file(filename):
     for row in range(1,worksheet.nrows):
         line=xls_row_to_list(worksheet.row(row))
 
-
         # If its a transaction (no checkout)
-        if line[7] == "Laadtransactie" or line[4] == "":
-
-            # Time of the transaction
-            date, time=line[:2]
-            dtime=_date_and_time(date,time)
-
-            # Location of the transaction
-            place=line[2]
-
-            # What is the credit change on the card
-            # If we added credit to the card
-            if line[7] == "Laadtransactie":
-                price=float(line[6].replace(',','.'))
-            else: # If we forgot to checkout, price was deducted
-                price=-1*float(line[5].replace(',','.'))
-
-            transactions.append(Transaction(dtime, place, price))
-
-        # If its a trip (checkin and checkout present)
-        # Also assumes that there only was a 'deduction' from the card, so the 'added' field is empty
+        if _is_transaction(line):
+            transactions.append(create_transaction(line))
         else:
-            # Get all the fields
-            # TODO: What is the private_or_business field? Ignore it for now
+            travels.append(create_trip(line))
 
-            #ci_date ci_time ci_loc co_time co_loc price transaction klasse product notes')
-            ci_date, ci_time, ci_loc, co_time, co_loc = line[:5]
-
-            # Position 5 in the line is the 'deducted' column, so prefix the price with a minus
-            price='-'+line[5]
-            
-            # Get the other relevant fields (ignore 'added' column and 'transaction type', since we already know its a trip
-            klasse, product, private_or_business,notes = line[8:]
-
-            t=Traveldata(ci_date, ci_time, ci_loc, co_time, co_loc, price, klasse, product, private_or_business, notes)
-            print(t)
-            exit()
-
-
-            # The price of the trip
-            price=_determine_price(price_plus,price_minus)
-
-            # The checkin/checkout times
-            check_in_time,check_out_time=_determine_checkin_checkout_time(date,check_in_time,check_out_time)
-
-            # The checkin/checkout events
-            checkin=Event(check_in_time, check_in_loc)
-            checkout=Event(check_out_time, check_out_loc)
-
-            t=Trip(checkin, checkout, price, klasse, product, notes)
-            # Debug
-            travels.append(t)
-            #print(line)
-            
     return (travels,transactions)
 
 def read_travels_csv_file(filename):
