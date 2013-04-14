@@ -54,9 +54,8 @@ class Trip:
         
         # TODO self.discount=_determine_discount(self)
     
-    # TODO: write this function
     def __str__(self):
-        return str(self.checkin.time) + '\t' + self.checkin.place + '\t' + str(self.checkout.time) + '\t' + self.checkout.place + '\t' + str(self.price)
+        return "{}\t{:20}\t{}\t{:20}\t{}".format(self.checkin.time, self.checkin.place, self.checkout.time, self.checkout.place, self.price)
 
 def _create_datetime(date,time):
         """ Converts strings date and time into a datetime object and returns it
