@@ -13,6 +13,13 @@ Event=namedtuple('Event', 'time place')
 # the fine). Has a time, a place and a price
 Transaction=namedtuple('Transaction', 'time place price')
 
+# Unparsed traveldata, as an itermediate step from converting the datafile to
+# Trip objects. ci=checkin, co=checkout. klasse=dutch for class
+__Traveldata=namedtuple('Traveldata', 'ci_date ci_time ci_loc co_time co_loc price transaction klasse product notes')
+
+# Unparsed transaction data, as an intermediate step
+__Transactiondata=namedtuple('Transactiondata', 'date time location price')
+
 class Trip:
     """ Class for trip objects, ie a single travel movement
     """
@@ -134,18 +141,24 @@ def read_ov_travels_file(filename):
         return(travels,transactions)
 
     if _long_ov_file(filename):
-        ovdata._read_ov_long_travels_file(filename)
-        print("True")
+        _read_ov_long_travels_file(filename)
     else:
         _read_ov_short_travels_file(filename)
-        print("False")
 
-    exit()
+# TODO
+def _read_ov_short_travels_file(filename):
+        print("Reading short ov-datafiles is not yet implemented")
+        exit()
+
+def _read_ov_long_travels_file(filename):
+    travels=list()
+    transactions=list()
     fileIN=open(filename,'r')
     #HEADER LINE
     line=fileIN.readline()
     #Second line
     line=fileIN.readline()
+
     # Reading the file is a bit messy, because for some rediculous reason 
     # ov-chipkaart.nl insists on printing the checkout event before the checkin event 
     while line:
@@ -180,6 +193,8 @@ def read_ov_travels_file(filename):
         line=fileIN.readline()
 
     fileIN.close()
+    print("Trips:{}\tTransactions:{}\t".format(len(travels),len(transactions)))
+    exit()
     return (travels,transactions)
 
 def _determine_price(price_plus,price_minus):
@@ -241,6 +256,7 @@ def read_ns_travels_file(filename):
     for row in range(1,worksheet.nrows):
         line=xls_row_to_list(worksheet.row(row))
 
+
         # If its a transaction (no checkout)
         if line[7] == "Laadtransactie" or line[4] == "":
 
@@ -264,6 +280,19 @@ def read_ns_travels_file(filename):
         else:
             # Get all the fields
             # TODO: What is the private_or_business field? Ignore it for now
+
+            # hiero
+            print("We zijn hiero")
+            print(ovdata.ns_header)
+            print(line)
+            print(line[:5])
+            #ci_date ci_time ci_loc co_time co_loc price transaction klasse product notes')
+            ci_date, ci_time, ci_loc, co_time, co_loc = line[:5]
+            print(line[5:])
+            #TODO
+            #price transaction klasse product notes
+            exit()
+
             date,check_in_time,check_in_loc,check_out_time,check_out_loc,price_minus, price_plus,transaction_type,klasse,product, private_or_business,notes = line
 
             # The price of the trip
