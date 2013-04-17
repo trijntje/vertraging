@@ -55,7 +55,7 @@ class Trip:
         # TODO self.discount=_determine_discount(self)
     
     def __str__(self):
-        return "{}\t{:20}\t{}\t{:20}\t{}".format(self.checkin.time, self.checkin.place, self.checkout.time, self.checkout.place, self.price)
+        return "{}\t{:25}\t{}\t{:25}\t{}".format(self.checkin.time, self.checkin.place, self.checkout.time, self.checkout.place, self.price)
 
 def _create_datetime(date,time):
         """ Converts strings date and time into a datetime object and returns it
@@ -148,9 +148,6 @@ def _long_ov_file(filename):
     return False
 
 def read_ov_travels_file(filename):
-    travels=list()
-    transactions=list()
-
     # Lets check if this is a well formatted csv file
     if not _valid_ov_file(filename):
         error("Unable to recognise the csv file by the header, please file a bug")
@@ -158,7 +155,7 @@ def read_ov_travels_file(filename):
         return(travels,transactions)
 
     if _long_ov_file(filename):
-        _read_ov_long_travels_file(filename)
+        return _read_ov_long_travels_file(filename)
     else:
         _read_ov_short_travels_file(filename)
 
@@ -168,6 +165,7 @@ def _read_ov_short_travels_file(filename):
         exit()
 
 def _read_ov_long_travels_file(filename):
+    # TODO What if the file is in reverse from the default?
     travels=list()
     transactions=list()
     fileIN=open(filename,'r')
@@ -186,32 +184,28 @@ def _read_ov_long_travels_file(filename):
             checkout_line=spline
             checkin_line=_ov_line_to_list(fileIN.readline())
 
-            # Get the checkin event
-            date=checkin_line[0]
-            time=checkin_line[1]
-            dtime=_date_and_time(date,time)
-            checkin=Event(dtime,checkin_line[2])
+            # Add checkin time to checkout line (which is the most complete line of the two)
+            checkout_line[1]=checkin_line[1]
 
-            # Get the checkout event
-            date=checkout_line[0]
-            time=checkout_line[3]
-            dtime=_date_and_time(date,time)
-            checkout=Event(dtime,checkout_line[4])
+            # Add the iminus to the price
+            checkout_line[5]='-'+checkout_line[5]
 
-            # Get the price
-            price=checkout_line[5]
-            price=price.replace(',','.')
-            price=-1* float(price)
+            # Remove the transaction type since we know its a trip
+            del checkout_line[6]
 
-            travels.append(Trip(checkin,checkout,price))
+            # Add empty field because data from ov-chipkaart.nl does not 
+            # contain a private_or_business field
+            checkout_line.append("")
+
+            t=Traveldata(*checkout_line)
+            
+            travels.append(Trip(t))
             #travels.append(_ov_events_to_trip(checkin_event, checkout_event))
         else: # TODO what if it isn't a checkout?
             pass
         line=fileIN.readline()
 
     fileIN.close()
-    print("Trips:{}\tTransactions:{}\t".format(len(travels),len(transactions)))
-    exit()
     return (travels,transactions)
 
 def _determine_price(price_plus,price_minus):
