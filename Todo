@@ -7,8 +7,8 @@ Add data.py which contains data on the different card types
 Split up the program from the library DONE
     use data.py to check if a trip was with discount/free
 Add support for traveldata provided by ov-chipkaart.nl  DONE
-    Write check to see if it was a full export or only a checkout export. Throw error if short export
-    Convert ov-chipkaart line into ns-format line, join functions together
+    Write check to see if it was a full export or only a checkout export. Throw error if short export DONE
+    Convert ov-chipkaart line into ns-format line, join functions together DONE
 Find the proper way to extract text from xls cells DONE
 Clean up Trip.__init__, move parsing of lines to read_ns/ov_travels_file DONE
 Check if the stupid ov-chipkaart file isn't reversed (this is possible to do on the website, and carries over into the exported file)

@@ -17,6 +17,8 @@ def main():
         ovnl.error("Cannot find file '{}', exiting..".format(filename))
         exit(-1)
 
+    print(ovnl.ovdata.product)
+    exit()
     # TODO implement checking of file typ properly
     extension=sys.argv[1].split('.')[-1]
     if extension == "csv":
