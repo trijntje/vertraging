@@ -372,18 +372,16 @@ def transactions_total(travels):
 
     return(round(added,2),round(deducted,2))
     
-def get_missing_checkout(travels):
+def get_missing_checkout(transactions):
     """
     Returns a list of all trips where the user forgot the check out.
     """
     missing_checkout=list()
 
-    for trip in travels:
-        # If it was a trip
-        if trip.transaction_type == 'Reis':
-            # But there is no checkout
-            if trip.check_out_time == '':
-                missing_checkout.append(trip)
+    for transaction in transactions:
+        # If there is no checkout
+        if transaction.price == -10.0:
+            missing_checkout.append(transaction)
 
     return missing_checkout
             

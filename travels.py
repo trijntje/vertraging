@@ -5,6 +5,40 @@ import os
 import datetime
 import ovnl
 
+separator='-'*80
+
+def print_all_trips(travels):
+    print("There are a total of {} trips:".format(len(travels)))
+    for trip in travels:
+        print(trip)
+    print(separator)
+
+def print_all_transactions(transactions):
+    print("There are a total of {} transactions:".format(len(transactions)))
+    for trans in transactions:
+        print(trans)
+    print(separator)
+
+def print_all_delays(travels):
+    delays=ovnl.possible_delays(travels)
+    if len(delays) == 0:
+        print("No delays in {} trips detected".format(len(travels)))
+    else:
+        print("Possible delays in {} of {} trips:".format(len(delays), len(travels)))
+        for trip in delays:
+            print(trip)
+    print(separator)
+
+def print_all_missed_checkouts(transactions,travels):
+    no_checkout=ovnl.get_missing_checkout(transactions)
+    if len(no_checkout) == 0:
+        print("No missed checkouts in {} trips detected".format(len(no_checkout)))
+    else:
+        print("You forgot to checkout in {} of {} trips:".format(len(no_checkout), len(travels)))
+        for transaction in no_checkout:
+            print(transaction)
+    print(separator)
+
 def main():
 
     if len(sys.argv) != 2:
@@ -17,8 +51,6 @@ def main():
         ovnl.error("Cannot find file '{}', exiting..".format(filename))
         exit(-1)
 
-    print(ovnl.ovdata.product)
-    exit()
     # TODO implement checking of file typ properly
     extension=sys.argv[1].split('.')[-1]
     if extension == "csv":
@@ -28,26 +60,15 @@ def main():
         # Read the NS travels file
         travels,transactions=ovnl.read_ns_travels_file(filename)
 
-    #for transaction in transactions:
-        #print("{}\t{}\t{}".format(transaction.time, transaction.place, transaction.price))
+    # This is mainly for debuggin purposes
+    print_all_trips(travels)
+    print_all_delays(travels)
 
-    for trip in travels:
-        print(trip)
-    # PRINT THE MINIMUM TRAVEL TIMES
-    #min_times=minimum_travel_times(travels)
-    #for key in min_times.keys():
-    #    print("Van {} naar {}\t{}".format(key[0],key[1],min_times[key]))
+    print_all_transactions(transactions)
+    #This needs travels to say 'forgot to checkout in x out of N travels'
+    print_all_missed_checkouts(transactions,travels)
 
-    # PRINT POSSIBLE DELAYS:
-    #delays=ovnl.possible_delays(travels)
-    #print("Possible delays in {} of {} trips:".format(len(delays), len(travels)))
-    #for trip in delays:
-    #    print(trip)
 
-    # PRINT THE MISSING CHECKOUTS
-    #no_checkout=get_missing_checkout(travels)
-    #for trip in no_checkout:
-    #    print(trip)
 
     # PRINT THE TOTAL OF ALL INTERACTIONS
     #added,deducted=ovnl.transactions_total(travels)
