@@ -13,3 +13,5 @@ Find the proper way to extract text from xls cells DONE
 Clean up Trip.__init__, move parsing of lines to read_ns/ov_travels_file DONE
 Check if the stupid ov-chipkaart file isn't reversed (this is possible to do on the website, and carries over into the exported file)
 Join methods/functions for ns and ov datafiel into seperate classes for clarity
+
+Convert Transaction to class to implement __str__ for pretty printing

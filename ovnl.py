@@ -17,8 +17,15 @@ Transaction=namedtuple('Transaction', 'time place price')
 # Trip objects. ci=checkin, co=checkout. klasse=dutch for class
 Traveldata=namedtuple('Traveldata', 'ci_date ci_time ci_loc co_time co_loc price klasse product private_or_business notes')
 
-# Unparsed transaction data, as an intermediate step
-Transactiondata=namedtuple('Transactiondata', 'date time location price')
+class Transaction2:
+    """ Class for transaction objects, mainly for pretty printing by implementing __str__
+    """
+    def __init__(self, dtime, date, place):
+        self.time=dtime
+        # HIERO
+        pass
+    def __str__(self):
+        pass
 
 class Trip:
     """ Class for trip objects, ie a single travel movement
