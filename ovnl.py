@@ -9,16 +9,25 @@ from collections import namedtuple
 # Checkin/checkout event, has a time and a place
 Event=namedtuple('Event', 'time place')
 
-# Transaction (either adding credit or forgetting to checkout and getting 
-# the fine). Has a time, a place and a price
-Transaction=namedtuple('Transaction', 'time place price')
-
 # Unparsed traveldata, as an itermediate step from converting the datafile to
 # Trip objects. ci=checkin, co=checkout. klasse=dutch for class
 Traveldata=namedtuple('Traveldata', 'ci_date ci_time ci_loc co_time co_loc price klasse product private_or_business notes')
 
 # Unparsed transaction data, as an intermediate step
 Transactiondata=namedtuple('Transactiondata', 'date time location price')
+
+class Transaction:
+    """ Class for transactions, e.g. adding credit to the card.
+        Forgetting to check-out is also an transaction
+    """
+    def __init__(self,time,place,price):
+        #
+        self.time=time
+        self.place=place
+        self.price=price
+
+    def __str__(self):
+        return "{}\t{:25}\t{}".format(self.time,self.place,self.price)
 
 class Trip:
     """ Class for trip objects, ie a single travel movement
